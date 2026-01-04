@@ -1,66 +1,10 @@
 ![hxdiscord](https://user-images.githubusercontent.com/99131021/222229452-cffd2b4f-0a7f-47a4-946f-5c568f64de1d.png)
-## hxdiscord
+## hxdiscord (Izz Fork)
 
-hxdiscord is a Discord API Wrapper for Haxe.
+hxdiscord is a Discord API Wrapper for Haxe. This fork is for fixing things and adding additional functionality I needed for my own personal bot.
+
 ## Installation
 
-`haxelib git hxdiscord https://github.com/Brainy0789/hxdiscord.git`
+`haxelib git hxdiscord https://github.com/Izwzyzx/hxdiscord.git`
 
 `haxelib install hxdiscord`
-
-## About
-
-hxdiscord is a Discord Library for Haxe. It's still in development. More things will be added, but for now, you can make your own Discord Bot with this!
-
-## Targets
-
-I don't know how many targets does hxdiscord support, since I've not tried them all. But here's a list of them
-
-NOTE (08/03/2022): I made attachments work for every single target that hxdiscord supports, so you don't have to worry about using Neko
-
-- ✅ C++
-- ✅ Neko (RECOMMENDED)
-- ✅ HashLink
-- ⚠️ NodeJS (Partially usable)
-- ❌ Python (I want to support it tho)
-
-## Need help with something?
-
-Feel free to join our Discord server. Here you can talk with the developer, make questions or even ask for help!
-https://discord.gg/gKQh5cC59w
-
-## Example
-
-Here's an example of a Discord Bot, using the hxdiscord library.
-EDIT: Due to one issue being posted, I'd like to mention that ALL privileged intents must be enabled in order for this example code snippet to work.
-Enable these settings: https://prnt.sc/Xb6KToqeEOfy
-
-```haxe
-import hxdiscord.DiscordClient;
-import hxdiscord.utils.Intents;
-import hxdiscord.types.*;
-
-class Main
-{
-    static var Bot:DiscordClient;
-    static function main()
-    {
-        Bot = new DiscordClient("your token here", [Intents.ALL], false);
-        Bot.onReady = onReady;
-        Bot.onMessageCreate = onMessageCreate;
-        Bot.connect();
-    }
-
-    public static function onReady()
-    {
-        trace("The bot is ready");
-    }
-
-    public static function onMessageCreate(m:Message)
-    {
-        if (m.content == "hi")
-        {
-            m.reply({content:"Hello!"}, true); //true or false, the bot will mention the user
-        }
-    }
-}
