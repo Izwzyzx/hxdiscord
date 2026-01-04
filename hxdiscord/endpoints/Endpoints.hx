@@ -294,6 +294,36 @@ class Endpoints
         return response;
     }
 
+    // Messages
+
+    /**
+	 * Retrieves a specific message in the channel and returns it as a JSON object.
+	 * @param channel_id	Numerical ID of the channel.
+	 * @param m_id			Numerical ID of the message.
+	 */
+	public static function getMessage(channel_id:String, m_id:String) {
+		var req:hxdiscord.utils.Http = new hxdiscord.utils.Http("https://discord.com/api/v"+hxdiscord.gateway.Gateway.API_VERSION+"/channels/"+channel_id+"/messages/"+m_id);
+	
+		req.addHeader("User-Agent", "hxdiscord (https://github.com/FurretDev/hxdiscord)");
+		req.addHeader("Authorization", DiscordClient.authHeader);
+		req.setMethod("GET");
+	
+		var msg:Dynamic = null;
+	
+		req.onData = function(data:String) {
+			msg = haxe.Json.parse(data);
+		}
+	
+		req.onError = function(error) {
+			Sys.println('[${StringTools.lpad(Std.string(Date.now().getHours()), "0", 2)}:${StringTools.lpad(Std.string(Date.now().getMinutes()), "0", 2)}] getMessage: Error - $error');
+			Sys.println('[${StringTools.lpad(Std.string(Date.now().getHours()), "0", 2)}:${StringTools.lpad(Std.string(Date.now().getMinutes()), "0", 2)}] getMessage: ${req.responseData}');
+		}
+	
+		req.send();
+
+		return msg;
+	}
+
     /**
         Deletes a message
         @param channel_id Channel ID where the message is
