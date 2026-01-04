@@ -241,7 +241,9 @@ class Endpoints
     
         r.onData = function(data:String)
         {
-            trace(data);
+            if (DiscordClient.debug) {
+                trace(data);
+            }
             guildmember = new hxdiscord.types.Member(haxe.Json.parse(data), guild_id);
             cb(guildmember);
         }
@@ -1422,8 +1424,8 @@ class Endpoints
             if (DiscordClient.debug)
             {
                 trace(data);
-                thing = data;
             }
+            thing = data;
         }
 
         r.onError = function(error)
