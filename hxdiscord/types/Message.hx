@@ -27,6 +27,8 @@ class Message
     public var content:String;
     public var embed:Embed;
     public var mention_everyone:Bool;
+    public var mentions:Array<UserS>;
+    public var mention_roles:Array<String>;
 
     var client:DiscordClient;
 
@@ -54,6 +56,8 @@ class Message
         attachments = ms.attachments;
         content = ms.content;
         mention_everyone = ms.mention_everyone;
+        mentions = ms.mentions;
+        mention_roles = ms.mention_roles;
         guildmember = ms.member;
         guild_id = ms.guild_id;
         author = new User(_client, ms.author);
