@@ -698,7 +698,7 @@ class Endpoints
     {
         emoji = emoji.replace(">", "");
         emoji = emoji.replace("<", "");
-        var req:Http = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/"+channel_id+"/messages/"+message_id+"/reactions/"+emoji+"/@me");
+        var req:Http = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/"+channel_id+"/messages/"+message_id+"/reactions/"+emoji.urlEncode()+"/@me");
     
         req.addHeader("User-Agent", "hxdiscord (https://github.com/FurretDev/hxdiscord)");
         req.addHeader("Authorization", DiscordClient.authHeader);
