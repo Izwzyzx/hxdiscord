@@ -15,3 +15,4 @@ hxdiscord is a Discord API Wrapper for Haxe. This fork is for fixing things and 
 - Fixed some `trace()`s missing the debug mode check
 - Added `getMessage()` function to Endpoints
 - Fixed emoji reactions needing to be URL encoded
+- Removed submodule reference preventing install via `haxelib git`
