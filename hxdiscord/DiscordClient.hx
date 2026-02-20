@@ -262,12 +262,8 @@ class DiscordClient {
                     Gateway.GATEWAY_URL = d.resume_gateway_url + "?v=" + Gateway.API_VERSION;
                     #end
                     canResume = true;
-                    if (!bot) {
-                        authHeader = token;
-                    }
-                    else {
-                        authHeader = "Bot " + token;
-                    }
+                    authHeader = bot ? "Bot " + token : token;
+                    Sys.sleep(1);
                     onReady();
                     try {
                         accId = d.application.id;
