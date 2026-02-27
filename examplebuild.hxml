@@ -1,0 +1,4 @@
+-m ExampleBot
+-L hxdiscord
+--neko examplebot.n
+#--cmd neko examplebot.n
