@@ -20,3 +20,5 @@ hxdiscord is a Discord API Wrapper for Haxe. This fork is for fixing things and 
 - Added `searchGuildMembers()` and `getCurrentUserGuilds()` to Endpoints
 - Added example bot files based on original README
 	- This fixes code completion not working in VS Code
+- Added `requestGuildMembers()` to DiscordClient
+- DiscordClient now caches Members and Guilds at startup instead of just on receiving an update

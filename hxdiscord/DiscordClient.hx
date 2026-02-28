@@ -264,6 +264,18 @@ class DiscordClient {
                     canResume = true;
                     authHeader = bot ? "Bot " + token : token;
                     Sys.sleep(1);
+
+                    // Pre-populate caches
+                    var myGuilds:Array<hxdiscord.types.Guild> = Endpoints.getCurrentUserGuilds();
+                    for (i in 0...myGuilds.length) {
+                        var guild = Endpoints.getGuild(myGuilds[i].id);
+                        cache.guilds.set(guild.id, guild);
+                        for (j in 0...guild.roles.length) {
+                            cache.guilds_roles.set(guild.roles[j].id, guild.roles[j]);
+                        }
+                        requestGuildMembers(myGuilds[i].id);
+                    }
+
                     onReady();
                     try {
                         accId = d.application.id;
@@ -447,6 +459,18 @@ class DiscordClient {
                 case "PRESENCE_UPDATE":
                     cache.presences.set(d.user.id, d);
                     onPresenceUpdate(d);
+                case "GUILD_MEMBERS_CHUNK":
+                    var members:Array<Member> = d.members;
+                    for (i in 0...members.length) {
+                        /*for (x in 0...members[i].roles.length) {
+                            members[i].permissionsBitwise.push(cache.guilds_roles.get(members[i].roles[x]).permissions);
+                        }*/
+                        cache.guild_members.set(d.guild_id+members[i].user.id, members[i]);
+                    }
+                    var presences:Array<Dynamic> = d.presences;
+                    for (i in 0...presences.length) {
+                        cache.presences.set(presences[i].user.id, presences[i]);
+                    }
             }
         #if (!hl)
         } catch (err) {
@@ -570,6 +594,26 @@ class DiscordClient {
                 afk: false
             }
         };
+
+        ws.send(haxe.Json.stringify(data));
+    }
+
+    /**
+     * Used to request all members for a guild. The server will send GUILD_MEMBERS_CHUNK events in response with up to 1000 members.
+     *
+     * RATE LIMITED: 1 request per guild per bot every 30 seconds. Requests that exceed this limit will receive a RATE_LIMITED event as a response.
+     * @param guild_id  ID of the guild to get members for
+     */
+    public function requestGuildMembers(guild_id:String) {
+        var data = {
+            op: 8,
+            d: {
+              guild_id: guild_id,
+              query: "",
+              limit: 0,
+              presences: true
+            }
+          };
 
         ws.send(haxe.Json.stringify(data));
     }
