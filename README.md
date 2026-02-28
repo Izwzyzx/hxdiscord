@@ -16,3 +16,7 @@ hxdiscord is a Discord API Wrapper for Haxe. This fork is for fixing things and 
 - Added `getMessage()` function to Endpoints
 - Fixed emoji reactions needing to be URL encoded
 - Removed submodule reference preventing install via `haxelib git`
+- Added small delay before calling `onReady()` to fix occasional race condition issue
+- Added `searchGuildMembers()` and `getCurrentUserGuilds()` to Endpoints
+- Added example bot files based on original README
+	- This fixes code completion not working in VS Code

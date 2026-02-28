@@ -48,7 +48,6 @@ class Endpoints
         Creates a DM chat with a specified user ID
         @param userID The user ID
     **/
-
     public static function createDM(userID:String):String
     {
         var _data:String;
@@ -122,7 +121,6 @@ class Endpoints
         @param guildID The ID of the guild where the user is in
         @param permissionToLookFor The permission which you wanna look for. (Example: ADMINISTRATOR)
     **/
-
     public static function hasPermission(userID:String, guild_id:String, permissionToLookFor:String)
     {
         var hasPermission:Bool = false;
@@ -166,11 +164,13 @@ class Endpoints
         return hasPermission;
     }
 
-    /**
-        Get the information about a user
-        @param id The ID of the user
-    **/
 
+    /**
+     * Returns a list of guild member objects that are members of the guild.
+     * @param gid       The ID of the guild
+     * @param limit     The max number of members to return (1-1000)
+     * @param after     The highest user id in the previous page
+     */
     public static function getGuildMembers(gid:String, limit:Int = 1, after:Int = 1):Dynamic {
 	    var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/guilds/" + gid + "/members?limit="+limit+"&after="+after);
         //trace("https://discord.com/api/v"+Gateway.API_VERSION+"/users/" + id);
@@ -196,6 +196,44 @@ class Endpoints
 
         return dataJson;
     }
+
+
+    /**
+     * Returns a list of guild member objects whose username or nickname starts with a provided string.
+     * @param gid       The ID of the guild
+     * @param query     Query string to match username(s) and nickname(s) against.
+     * @param limit     The max number of members to return (1-1000)
+     */
+    public static function searchGuildMembers(gid:String, query:String, limit:Int = 1):Dynamic {
+	    var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/guilds/" + gid + "/members/search?query="+query.urlEncode()+"&limit="+limit);
+
+        r.addHeader("User-Agent", "hxdiscord (https://github.com/FurretDev/hxdiscord)");
+        r.addHeader("Authorization", DiscordClient.authHeader);
+        r.setMethod("GET");
+
+        var dataJson:Dynamic = null;
+
+        r.onData = function(data:String)
+        {
+            dataJson = haxe.Json.parse(data);
+        }
+
+        r.onError = function(error)
+        {
+            trace("An error has occurred: " + error);
+            trace(r.responseData);
+        }
+
+        r.send();
+
+        return dataJson;
+    }
+    
+
+    /**
+     * Returns a user object for a given user ID.
+     * @param id        The ID of the user
+     */
     public static function getUser(id:String)
     {
         var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/users/" + id);
@@ -228,7 +266,6 @@ class Endpoints
         @param guild_id The guild id where the user is in
         @param id The user ID
     **/
-
     public static function getGuildMember(guild_id:String, id:String, cb:hxdiscord.types.Member -> Void, err:Dynamic->Void):Void
     {
         var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/guilds/" + guild_id + "/members/" + id);
@@ -360,7 +397,6 @@ class Endpoints
         @param m_id The message id
         @param m The message create object
     */
-
     public static function editMessage(channel_id:String, m_id:String, m:MessageCreate)
     {
         var req:Http = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/"+channel_id+"/messages/"+m_id);
@@ -693,7 +729,6 @@ class Endpoints
         @param message_id The id of the message you wanna react to
         @param emoji The emoji itself
     **/
-
     public static function createReaction(channel_id:String, message_id:String, emoji:String)
     {
         emoji = emoji.replace(">", "");
@@ -726,7 +761,6 @@ class Endpoints
         @param message_id The id of the message you wanna remove the reaction
         @param emoji The emoji itself
     **/
-
     public static function deleteOwnReaction(channel_id:String, message_id:String, emoji:String)
     {
         var req:Http = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/"+channel_id+"/messages/"+message_id+"/reactions/"+emoji+"/@me");
@@ -758,7 +792,6 @@ class Endpoints
         @param emoji The emoji itself
         @param user_id The ID of the user
     **/
-
     public static function deleteUserReaction(channel_id:String, message_id:String, emoji:String, user_id:String)
     {
         var req:Http = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/"+channel_id+"/messages/"+message_id+"/reactions/"+emoji+"/" + user_id);
@@ -789,7 +822,6 @@ class Endpoints
         @param channel_id The channel id where the message is located
         @param message_id The id of the message
     **/
-    
     public static function deleteAllReactions(channel_id:String, message_id:String)
     {
         var req:Http = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/"+channel_id+"/messages/"+message_id+"/reactions");
@@ -821,7 +853,6 @@ class Endpoints
         @param message_id The id of the message
         @param emoji The emoji itself
     **/
-
     public static function deleteAllReactionsForEmoji(channel_id:String, message_id:String, emoji:String)
     {
         var req:Http = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/"+channel_id+"/messages/"+message_id+"/reactions/"+emoji);
@@ -848,6 +879,38 @@ class Endpoints
     }
 
     //guilds
+
+    /**
+     * Returns a list of partial guild objects the current user is a member of. For OAuth2, requires the guilds scope.
+     */
+    public static function getCurrentUserGuilds() {
+        var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/users/@me/guilds");
+
+        r.addHeader("User-Agent", "hxdiscord (https://github.com/FurretDev/hxdiscord)");
+        r.addHeader("Authorization", DiscordClient.authHeader);
+
+        r.setMethod("GET");
+
+        var guilds:Array<hxdiscord.types.Guild> = [];
+
+		r.onData = function(data:String)
+		{
+            var parsedData = haxe.Json.parse(data);
+            for (i in 0...parsedData.length) {
+                guilds.push(new hxdiscord.types.Guild(parsedData[i]));
+            }
+		}
+
+		r.onError = function(error)
+		{
+			trace("An error has occurred: " + error);
+            trace(r.responseData);
+		}
+
+		r.send();
+
+        return guilds;
+    }
 
     /**
         Get a JSON object about a guild
@@ -998,7 +1061,6 @@ class Endpoints
         @param user_id The ID of the user you want to modify
         @param d The request object
     **/
-
     public static function modifyGuildMember(guild_id:String, user_id:String, d:hxdiscord.types.Typedefs.ModifyGuildMemberParams):Bool {
         var s:Bool = true;
         var req:Http = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/guilds/"+guild_id+"/members/"+user_id);
@@ -1032,7 +1094,6 @@ class Endpoints
         @param guild_id The ID of the guild
         @param params The request object
     **/
-
     public static function modifyGuild(guild_id:String, params:hxdiscord.types.Typedefs.ModifyGuildParams):Bool
     {
         var s:Bool = true;
@@ -1066,7 +1127,6 @@ class Endpoints
         Returns a JSON object representing all the channels in a guild
         @param guild_id The ID of the guild
     **/
-
     public static function getGuildChannels(guild_id:String)
     {
         var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/guilds/" + guild_id + "/channels");
@@ -1100,7 +1160,6 @@ class Endpoints
         Removes a guild (This will only work if you're the owner of the guild)
         @param guild_id The ID of the guild you want to remove
     **/
-
     public static function deleteGuild(guild_id:String):Bool
     {
         var s:Bool = true;
@@ -1134,7 +1193,6 @@ class Endpoints
         @param channel_id The ID of the channel
         @param overwrite_id The ID of the role you want to over
     **/
-
     public static function editChannelPermissions(channel_id:String, overwrite_id:String, data:Dynamic):Bool
     {
         var s:Bool = true;
@@ -1163,11 +1221,6 @@ class Endpoints
         req.send();
         return s;
     }
-
-    /**
-        Returns a JSON representation of the invites from the channel
-        @param channel_id The ID of the channel
-    **/
 
     public static function getChannel(channel_id:String):Channel
     {
@@ -1229,6 +1282,10 @@ class Endpoints
         }
     
 
+    /**
+        Returns a JSON representation of the invites from the channel
+        @param channel_id The ID of the channel
+    **/
     public static function getChannelInvites(channel_id:String)
     {
         var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/" + channel_id + "/invites");
@@ -1263,7 +1320,6 @@ class Endpoints
         @param channel_id The channel ID to get the messages
         @param obj The JSON object (Read API)
     **/
-
     public static function getChannelMessages(channel_id:String, limit:Int) {
         var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/" + channel_id + "/messages?limit=" + limit);
 
@@ -1297,7 +1353,6 @@ class Endpoints
         @param channel_id The id of the channel
         @param obj The request object
     **/
-
     public static function createChannelInvite(channel_id:String, obj:hxdiscord.types.Typedefs.ChannelInvite):String
     {
         var thing:String = "";
@@ -1334,7 +1389,6 @@ class Endpoints
         @param channel_id The ID of the channel
         @param overwrite_id The overwrite ID of the permission
     **/
-
     public static function deleteChannelPermission(channel_id:String, overwrite_id:String):Bool
     {
         var s:Bool = true;
@@ -1369,7 +1423,6 @@ class Endpoints
         @param channel_id The ID of the channel to follow
         @param id
     **/
-
     public static function followAnnouncementChannel(channel_id:String, id:String)
     {
         var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/" + channel_id + "/invites");
@@ -1404,7 +1457,6 @@ class Endpoints
         Triggers the typing indicator on a channel
         @param channel_id The channel ID on which to trigger the typing indicator
     **/
-
     public static function triggerTypingIndicator(channel_id:String)
     {
         var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/" + channel_id + "/typing");
@@ -1437,7 +1489,6 @@ class Endpoints
         Returns a list of the pinned messages in a channel
         @param channel_id The channel ID
     **/
-
     public static function getPinnedMessages(channel_id:String)
     {
         var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/" + channel_id + "/pins");
@@ -1473,7 +1524,6 @@ class Endpoints
         @param channel_id The channel ID where the message is located on
         @param message_id The message ID
     **/
-
     public static function pinMessage(channel_id:String, message_id:String):Bool
     {
         var s:Bool = true;
@@ -1507,7 +1557,6 @@ class Endpoints
         @param channel_id The id of the channel where the message is located on
         @param message_id The id of the message you want to unpin
     **/
-
     public static function unpinMessage(channel_id:String, message_id:String):Bool
     {
         var s:Bool = true;
@@ -1636,7 +1685,6 @@ class Endpoints
         @param channel_id The id of the channel
         @param obj The object request
     **/
-
     public static function startThreadWithoutMessage(channel_id:String, obj:WithoutMessage):Bool
     {
         var s:Bool = true;
@@ -1709,7 +1757,6 @@ class Endpoints
         Join a thread
         @param channel_id The channel ID
     **/
-
     public static function joinThread(channel_id:String):Bool
     {
         var s:Bool = true;
@@ -1743,7 +1790,6 @@ class Endpoints
         @param channel_id The ID of the thread
         @param user_id The ID of the user
     **/
-
     public static function addThreadMember(channel_id:String, user_id:String):Bool
     {
         var s:Bool = true;
@@ -1776,7 +1822,6 @@ class Endpoints
         Leave a thread
         @param channel_id The ID of the channel
     **/
-
     public static function leaveThread(channel_id:String):Bool
     {
         var s:Bool = true;
@@ -1810,7 +1855,6 @@ class Endpoints
         @param channel_id The channel ID
         @param user_id The ID of the user
     **/
-
     public static function removeThreadMember(channel_id:String, user_id:String):Bool
     {
         var s:Bool = true;
@@ -1844,7 +1888,6 @@ class Endpoints
         @param channel_id
         @param user_id
     **/
-
     public static function getThreadMember(channel_id:String, user_id:String)
     {
         var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/" + channel_id + "/thread-members/" + user_id);
@@ -1880,7 +1923,6 @@ class Endpoints
         @param channel_id The ID of the channel
         @param user_id The ID of the user
     **/
-
     public static function listThreadMembers(channel_id:String, user_id:String)
     {
         var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/" + channel_id + "/thread-members/");
@@ -1951,7 +1993,6 @@ class Endpoints
         @param channel_id The channel ID
         @param user_id The user ID
     **/
-
     public static function listPrivateArchivedThreads(channel_id:String, user_id:String)
     {
         var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/" + channel_id + "/thread-members/archived/public");
@@ -1986,7 +2027,6 @@ class Endpoints
         List joined private archived threads
         @param channel_id The channel ID
     **/
-
     public static function listJoinedPrivateArchivedThreads(channel_id:String)
     {
         var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/channels/" + channel_id + "/users/@me/thread-members/archived/private");
@@ -2023,7 +2063,6 @@ class Endpoints
         @param role_id The role ID
         @param data The request data
     **/
-
     public static function modifyGuildRole(guild_id:String, role_id:String, data:hxdiscord.types.Typedefs.ModifyGuildRoleParams):Bool
     {
         var s:Bool = true;
@@ -2059,7 +2098,6 @@ class Endpoints
         @param user_id The user ID
         @param role_id The role ID
     **/
-
     public static function addGuildMemberRole(guild_id:String, user_id:String, role_id:String):Bool
     {
         var s:Bool = true;
@@ -2094,7 +2132,6 @@ class Endpoints
         @param user_id The user ID
         @param role_id The role ID
     **/
-
     public static function removeGuildMemberRole(guild_id:String, user_id:String, role_id:String):Bool
     {
         var s:Bool = true;
@@ -2128,7 +2165,6 @@ class Endpoints
     /**
         Get application commands
     **/
-
     public static function getGlobalApplicationCommands()
     {
         var r = new Http("https://discord.com/api/v"+Gateway.API_VERSION+"/applications/" + DiscordClient.accountId + "/commands");
@@ -2155,6 +2191,7 @@ class Endpoints
 
         return r.responseData;
     }
+
     /**
         Add application commands
         @param data JSON object containing application commands
@@ -2257,7 +2294,6 @@ class Endpoints
         @param channel_id The channel ID
         @param messages An array with message ids
     **/
-
     public static function bulkDeleteMessages(channel_id:String, messages:Array<String>)
     {
         var r:Http;
@@ -2288,7 +2324,6 @@ class Endpoints
     /**
         Send the interaction callback for the thinking state!
     **/
-
     public static function makeInteractionThink(interactionID:String, interactionToken:String, ?ephemeral:Bool = false)
     {
         var r:Http;
@@ -2530,7 +2565,6 @@ class Endpoints
         @param ic The content of the message
         @param interactionToken The token of the interaction you wanna edit
     **/
-
     public static function editInteractionResponse(ic:hxdiscord.types.Typedefs.InteractionCallback, interactionToken:String)
     {
         var response:String;
