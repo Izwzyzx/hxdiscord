@@ -490,24 +490,28 @@ class DiscordClient {
 
     /**
         Changes the status from the account
-        @param status
-        @param type
-        @param presence
-        @param afk
+        @param status The status type ("online", "dnd", "idle", "invisible", "offline")
+        @param type The presence type ("game", "streaming", "listening", "watching", "custom", "competing")
+        @param presence The presence text
+        @param afk Boolean
     **/
-    public function changeStatus(status:String, ?type:String, ?presence:String, ?afk:Bool = false)
-    {
+    public function changeStatus(status:String, ?type:String, ?presence:String, ?afk:Bool = false) {
+        status = status.toLowerCase();
+        type = type.toLowerCase();
         var availableStatus:Array<String> = ["online", "dnd", "idle", "invisible", "offline"];
-        if (status != "online" && status != "dnd" && status != "idle" && status != "invisible" && status != "offline")
-        {
+
+        //if (status != "online" && status != "dnd" && status != "idle" && status != "invisible" && status != "offline")
+        if (!availableStatus.contains(status)) {
             throw("Invalid status: " + status);
         }
         
         var data = null;
         var numericType:Int = 0;
-        if (type != null && type != null)
-        {
-            switch(type.toLowerCase())
+        var activities:Array<Dynamic> = [];
+        var name = presence; // May not be ideal but it works
+
+        if (type != null) {
+            switch(type)
             {
                 case "game":
                     numericType = 0;
@@ -519,28 +523,31 @@ class DiscordClient {
                     numericType = 3;
                 case "custom":
                     numericType = 4;
+                    name = "Custom Status";
                 case "competing":
                     numericType = 5;
             }
 
-            data = {
-                op: 3,
-                d: {
-                    since: null,
-                    activities: [
-                        {
-                            name: presence,
-                            type: numericType
-                        }
-                    ],
-                    status: status,
-                    afk: afk
+            activities = [
+                {
+                    name: name,
+                    state: presence,
+                    type: numericType
                 }
+            ];
+        }
+
+        data = {
+            op: 3,
+            d: {
+                since: null,
+                activities: activities,
+                status: status,
+                afk: afk
             }
         }
 
-        status = status.toLowerCase();
-        this.status = status.toLowerCase();
+        this.status = status;
         this.presence = presence;
         this.presenceType = numericType;
         this.afk = afk;
@@ -552,10 +559,10 @@ class DiscordClient {
     /**
         Change the presence.
         @param type The presence type ("game", "streaming", "listening", "watching", "custom", "competing")
-        @param status The presence status
+        @param presence The presence text
     **/
 
-    public function changePresence(type:String, status:String)
+    public function changePresence(type:String, presence:String)
     {
         if (type != "game" && type != "streaming" && type != "listening" && type != "watching" && type != "custom" && type != "competing")
         {
@@ -586,7 +593,8 @@ class DiscordClient {
                 since: null,
                 activities: [
                     {
-                        name: status,
+                        name: presence,
+                        state: presence,
                         type: numericType
                     }
                 ],

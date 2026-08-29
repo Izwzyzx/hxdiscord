@@ -22,3 +22,4 @@ hxdiscord is a Discord API Wrapper for Haxe. This fork is for fixing things and 
 	- This fixes code completion not working in VS Code
 - Added `requestGuildMembers()` to DiscordClient
 - DiscordClient now caches Members and Guilds at startup instead of just on receiving an update
+- Improved `changeStatus` and `changePresence`
